@@ -15,7 +15,7 @@ public class MainActivity extends Activity implements OnClickListener
 	private Button sendButton;
     private EditText macAdress;
 	private TextView labelMessage;
-    private static String address = "20:13:06:19:07:50"; //115000 bps
+    private String address = "20:13:06:19:07:50"; //115000 bps
 	
     @Override
     public void onCreate(Bundle savedInstanceState) 

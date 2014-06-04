@@ -15,7 +15,7 @@ public class MainActivity extends Activity implements OnClickListener
 	private Button sendButton;
     private EditText macAdress;
 	private TextView labelMessage;
-    private static String address = "20:13:06:19:07:50"; //115000 bps
+    private String address = "20:13:06:19:07:50"; //115000 bps
 	
     @Override
     public void onCreate(Bundle savedInstanceState) 
@@ -25,6 +25,7 @@ public class MainActivity extends Activity implements OnClickListener
         setContentView(R.layout.main);
 
         this.labelMessage = (TextView) findViewById(R.id.label_message);
+        this.macAdress = (EditText) findViewById(R.id.input_address);
         this.macAdress.setText(this.address);
         this.sendButton = (Button) findViewById(R.id.btn_confirm);
         this.sendButton.setOnClickListener(this);

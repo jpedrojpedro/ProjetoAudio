@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Projeto Áudio Wireless</string>
+    <string name="btn_confirm">Enviar Mensagem</string>
+    <string name="label_message">Insira sua Mensagem</string>
+</resources>

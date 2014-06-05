@@ -3,4 +3,7 @@
     <string name="app_name">Projeto Áudio Wireless</string>
     <string name="btn_confirm">Enviar Mensagem</string>
     <string name="label_message">Insira sua Mensagem</string>
+    <string name="label_status">Streaming Status:</string>
+    <string name="radio_song_mambo">Mambo</string>
+    <string name="radio_song_windows">Windows</string>
 </resources>

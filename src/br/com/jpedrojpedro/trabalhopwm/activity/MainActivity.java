@@ -13,8 +13,10 @@ public class MainActivity extends Activity implements OnClickListener
 {
 
 	private Button sendButton;
-    private EditText macAdress;
-	private TextView labelMessage;
+    private EditText macAddress;
+    private TextView labelStatus;
+    private RadioButton radioMambo;
+    private RadioButton radioWindows;
     private String address = "20:13:06:19:07:50"; //115000 bps
 	
     @Override
@@ -24,11 +26,13 @@ public class MainActivity extends Activity implements OnClickListener
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        this.labelMessage = (TextView) findViewById(R.id.label_message);
-        this.macAdress = (EditText) findViewById(R.id.input_address);
-        this.macAdress.setText(this.address);
+        this.macAddress = (EditText) findViewById(R.id.input_address);
+        this.macAddress.setText(this.address);
         this.sendButton = (Button) findViewById(R.id.btn_confirm);
         this.sendButton.setOnClickListener(this);
+        this.labelStatus = (TextView) findViewById(R.id.label_status_demand);
+        this.radioMambo = (RadioButton) findViewById(R.id.radio_song_mambo);
+        this.radioWindows = (RadioButton) findViewById(R.id.radio_song_windows);
 
         if(!Bluetooth.getInstance().verifySupport())
         {
@@ -43,11 +47,17 @@ public class MainActivity extends Activity implements OnClickListener
 
     @Override
     public void onClick(View view) {
-        this.address = this.macAdress.getText().toString();
+        this.address = this.macAddress.getText().toString();
         Context context = view.getContext();
         Bluetooth.getInstance().setMacAddress(this.address);
-        Bluetooth.getInstance().startStreaming(
-                context.getResources().openRawResource(R.raw.mambo),
-                context);
+        if(this.radioMambo.isChecked())
+            Bluetooth.getInstance().setInputStream(
+                    context.getResources().openRawResource(R.raw.mambo)
+            );
+        else
+            Bluetooth.getInstance().setInputStream(
+                    context.getResources().openRawResource(R.raw.windows)
+            );
+        Bluetooth.getInstance().startStreaming();
     }
 }

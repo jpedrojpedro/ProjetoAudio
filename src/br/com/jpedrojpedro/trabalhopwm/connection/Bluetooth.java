@@ -1,11 +1,14 @@
 package br.com.jpedrojpedro.trabalhopwm.connection;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
+import br.com.jpedrojpedro.trabalhopwm.activity.MainActivity;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +24,7 @@ public class Bluetooth {
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private Context context;
     private OutputStream outStream = null;
-
+    private InputStream inputStream = null;
     private Bluetooth() {}
 
     public static Bluetooth getInstance() {
@@ -37,10 +40,8 @@ public class Bluetooth {
         return true;
     }
 
-    public void startStreaming(InputStream song, Context context) {
-        this.context = context;
-        ConnectionControl cc = new ConnectionControl();
-        cc.PlayWav(song);
+    public void startStreaming() {
+        new ConnectionControl();
     }
 
     public void setMacAddress(String macAddress) {
@@ -63,10 +64,6 @@ public class Bluetooth {
         this.btSocket = btSocket;
     }
 
-    public Context getContext() {
-        return this.context;
-    }
-
     public static UUID getMyUuid() {
         return MY_UUID;
     }
@@ -74,6 +71,12 @@ public class Bluetooth {
     public OutputStream getOutStream() { return this.outStream; }
 
     public void setOutStream(OutputStream stream) { this.outStream = stream; }
+
+    public InputStream getInputStream() { return this.inputStream; }
+
+    public void setInputStream(InputStream stream) { this.inputStream = stream; }
+
+    public Context getContext() { return this.context; }
 }
 
 class ConnectionControl implements Runnable {
@@ -81,15 +84,16 @@ class ConnectionControl implements Runnable {
     // Debug reasons
     private static final String TAG = "PlayerWireless";
 
-    ConnectionControl() {}
+    ConnectionControl() {
+        new Thread(this).start();
+    }
 
-    private void errorExit(String title, String message){
+    private void errorExit(String title, String message) {
         Toast.makeText(Bluetooth.getInstance().getContext(),
                 title + " - " + message, Toast.LENGTH_SHORT).show();
     }
 
-    public void PlayWav(InputStream is)
-    {
+    public void PlayWav(InputStream is) {
         int bytesRead;
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -104,7 +108,7 @@ class ConnectionControl implements Runnable {
                 int aux = 0;
                 String strAux = "";
                 while(bytes.length > aux) {
-                    if ( aux%14400 == 0) {
+                    if ( aux%1024 == 0) {
                         sendData(strAux);
                         strAux = "";
                     }
@@ -113,73 +117,65 @@ class ConnectionControl implements Runnable {
                 }
             }
         } catch(Exception e) {
+            Log.e(TAG, e.getMessage());
             Toast.makeText(Bluetooth.getInstance().getContext(),
-                    "Error starting draw.",
+                    "Error sending song",
                     Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void sendData(String message)
-    {
+    private void sendData(String message) {
         byte[] msgBuffer = message.getBytes();
 
-        Log.d(TAG, "...Sending data: " + message + "...");
+        Log.d(TAG, "Sending Data");
 
         try {
             Bluetooth.getInstance().getOutStream().write(msgBuffer);
         } catch (IOException e) {
-            String msg = "In onResume() and an exception occurred during write: " + e.getMessage();
-            if (Bluetooth.getInstance().getMacAddress().equals("00:00:00:00:00:00"))
-                msg = msg + ".\n\nUpdate your server address from 00:00:00:00:00:00 to the correct address on line 37 in the java code";
-            msg = msg +  ".\n\nCheck that the SPP UUID: " + Bluetooth.getMyUuid().toString() + " exists on server.\n\n";
-
-            errorExit("Fatal Error", msg);
+            Log.e(TAG, e.getMessage());
         }
     }
 
     @Override
     public void run() {
-        Log.d(TAG, "...In onResume - Attempting client connect...");
 
-        // Set up a pointer to the remote node using it's address.
+        Log.d(TAG, "Attempting to connect bluetooth");
+
         BluetoothDevice device =
                 Bluetooth.getInstance().getMyBluetoothAdapter().
                         getRemoteDevice(Bluetooth.getInstance().getMacAddress());
 
-        // Two things are needed to make a connection:
-        //   A MAC address, which we got above.
-        //   A Service ID or UUID.  In this case we are using the
-        //     UUID for SPP.
         try {
-            Bluetooth.getInstance().setBtSocket(device.createRfcommSocketToServiceRecord(Bluetooth.getMyUuid()));
+            Bluetooth.getInstance().setBtSocket(
+                    device.createRfcommSocketToServiceRecord(Bluetooth.getMyUuid()));
         } catch (IOException e) {
-            errorExit("Fatal Error", "In onResume() and socket create failed: " + e.getMessage() + ".");
+            Log.e(TAG, e.getMessage());
         }
 
-        // Discovery is resource intensive.  Make sure it isn't going on
-        // when you attempt to connect and pass your message.
         Bluetooth.getInstance().getMyBluetoothAdapter().cancelDiscovery();
 
-        // Establish the connection.  This will block until it connects.
-        Log.d(TAG, "...Connecting to Remote...");
+        Log.d(TAG, "Connecting");
+
         try {
             Bluetooth.getInstance().getBtSocket().connect();
-            Log.d(TAG, "...Connection established and data link opened...");
+            Log.d(TAG, "Connection established and data link opened");
         } catch (IOException e) {
             try {
                 Bluetooth.getInstance().getBtSocket().close();
             } catch (IOException e2) {
-                errorExit("Fatal Error", "In onResume() and unable to close socket during connection failure" + e2.getMessage() + ".");
+                errorExit(TAG, e2.getMessage());
             }
         }
 
-        // Create a data stream so we can talk to server.
-        Log.d(TAG, "...Creating Socket...");
+        Log.d(TAG, "Creating Socket");
 
         try {
-            Bluetooth.getInstance().setOutStream(Bluetooth.getInstance().getBtSocket().getOutputStream());
+            Bluetooth.getInstance().setOutStream(
+                    Bluetooth.getInstance().getBtSocket().getOutputStream());
         } catch (IOException e) {
-            errorExit("Fatal Error", "In onResume() and output stream creation failed:" + e.getMessage() + ".");
+            errorExit(TAG, e.getMessage());
         }
+
+        this.PlayWav(Bluetooth.getInstance().getInputStream());
     }
 }

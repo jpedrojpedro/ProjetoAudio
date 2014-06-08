@@ -18,34 +18,29 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:inputType="text|number" />
+        android:inputType="text|number|time" />
 
     <RadioGroup
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-
-        <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/radio_song_group"
             android:orientation="horizontal">
 
-            <RadioButton
-                android:id="@+id/radio_song_mambo"
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:layout_weight="1"
-                android:text="@string/radio_song_mambo"
-                android:textColor="@android:color/white"/>
+        <RadioButton
+            android:id="@+id/radio_song_mambo"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:text="@string/radio_song_mambo"
+            android:textColor="@android:color/white"/>
 
-            <RadioButton
-                android:id="@+id/radio_song_windows"
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:layout_weight="1"
-                android:text="@string/radio_song_windows"
-                android:textColor="@android:color/white"/>
-
-        </LinearLayout>
+        <RadioButton
+            android:id="@+id/radio_song_windows"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:text="@string/radio_song_windows"
+            android:textColor="@android:color/white"/>
 
     </RadioGroup>
 
@@ -67,6 +62,8 @@
             android:id="@+id/label_status_demand"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
+            android:maxLines="10000"
+            android:scrollbars = "vertical"
             android:text=""
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/white"/>
